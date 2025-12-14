@@ -81,7 +81,6 @@ class TenantPanelProvider extends PanelProvider
                 ->closeOnDateSelection()
                 ->native(false);
         });
-
     }
 
     public function panel(Panel $panel): Panel
@@ -97,12 +96,12 @@ class TenantPanelProvider extends PanelProvider
 
         FilamentView::registerRenderHook(
             PanelsRenderHook::HEAD_END,
-            fn () => view('meta')
+            fn() => view('meta')
         );
 
         FilamentView::registerRenderHook(
             PanelsRenderHook::GLOBAL_SEARCH_AFTER,
-            fn () => view('version-indicator')
+            fn() => view('version-indicator')
         );
 
         if (app()->environment('demo')) {
@@ -113,7 +112,7 @@ class TenantPanelProvider extends PanelProvider
             ];
             FilamentView::registerRenderHook(
                 PanelsRenderHook::BODY_START,
-                fn (): View => view('donation-banner', [
+                fn(): View => view('donation-banner', [
                     'link' => Arr::random($arraySupport),
                 ]),
             );
@@ -143,7 +142,7 @@ class TenantPanelProvider extends PanelProvider
             ->authGuard('web')
             ->path('/member')
             ->login(TenantLogin::class)
-            ->navigation(fn (NavigationBuilder $navigationBuilder) => $this->buildNavigation($navigationBuilder))
+            ->navigation(fn(NavigationBuilder $navigationBuilder) => $this->buildNavigation($navigationBuilder))
             ->discoverResources(in: app_path('Filament/Tenant/Resources'), for: 'App\\Filament\\Tenant\\Resources')
             ->discoverPages(in: app_path('Filament/Tenant/Pages'), for: 'App\\Filament\\Tenant\\Pages')
             ->discoverWidgets(in: app_path('Filament/Tenant/Widgets'), for: 'App\\Filament\\Tenant\\Widgets')
@@ -159,7 +158,7 @@ class TenantPanelProvider extends PanelProvider
     private function buildNavigation(NavigationBuilder $navigationBuilder): NavigationBuilder
     {
         return $navigationBuilder
-            ->items(array_filter($this->getNavigationItems(), fn ($item) => $item != null))
+            ->items(array_filter($this->getNavigationItems(), fn($item) => $item != null))
             ->groups($this->getNavigationGroups());
     }
 
@@ -236,18 +235,18 @@ class TenantPanelProvider extends PanelProvider
 
     private function initializeTenantPanel(Panel $panel, string $url): void
     {
-        $tenant = Tenant::whereHas('domains', fn ($query) => $query->where('domain', $url))->first();
+        $tenant = Tenant::whereHas('domains', fn($query) => $query->where('domain', $url))->first();
 
         if ($tenant) {
             tenancy()->initialize($tenant->id);
             $subdomain = $tenant->domains()->where('domain', $url)->first()?->domain;
 
             $panel->domain($subdomain);
-            config(['cache.prefix' => $subdomain.'_']);
+            config(['cache.prefix' => $subdomain . '_']);
 
             app(DatabaseTenancyBootstrapper::class)->bootstrap($tenant);
 
-            tenant()->run(fn () => $this->configureTenantBrand($panel));
+            tenant()->run(fn() => $this->configureTenantBrand($panel));
         } else {
             if (in_array($url, config('tenancy.central_domains'))) {
                 return;
@@ -267,6 +266,7 @@ class TenantPanelProvider extends PanelProvider
     private function configureTenantBrand(Panel $panel): void
     {
         $about = About::first();
+        // dd($about->photo);
 
         $panel->brandName($about->shop_name ?? 'Your Brand')
             ->brandLogo($about->photo ?? null);
@@ -297,7 +297,7 @@ class TenantPanelProvider extends PanelProvider
         return NavigationItem::make($resource::getLabel())
             ->visible($canAccess)
             ->icon($resource::getNavigationIcon())
-            ->isActiveWhen(fn (): bool => $active)
-            ->url(fn (): string => $resource::getUrl());
+            ->isActiveWhen(fn(): bool => $active)
+            ->url(fn(): string => $resource::getUrl());
     }
 }
